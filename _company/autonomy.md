@@ -61,6 +61,8 @@ this list is a deliberate, reviewed edit.
 
 - Read its own department's `CONTEXT.md` and `learnings.md`, plus
   `company-info.md`, `founder-preferences.md`, and `budget.md`.
+- Read `.messages/[channel].jsonl` if `messaging.md` routes a channel here.
+  Fetching happens outside this run entirely; see that file.
 - Write exactly one artifact into its own department's `output/`.
 - Open a pull request with that artifact and its ledger row.
 

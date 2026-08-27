@@ -1,6 +1,6 @@
 # Workspace Conventions
 
-This workspace layers seven conventions on top of the basic department
+This workspace layers eight conventions on top of the basic department
 (Inputs/Process/Outputs) shape used throughout this repo. They compound:
 each builds on the ones before it, but each is also independently
 useful on its own.
@@ -129,6 +129,23 @@ open a pull request; it can never merge one. See `autonomy.md` for the
 full contract, `budget.md`'s new Autonomous Runs section for the spend
 caps, and `../integrations/anthropic-api.md` for the credential this all
 runs on.
+
+## 8. Inbound Messaging
+
+An autonomous run can now learn something happened outside this repo: a
+channel in `messaging.md`'s roster routes fetched messages into a
+department's `.messages/[channel].jsonl`. It ships `Status: INACTIVE`,
+same dormancy contract as the two extensions above, and layers under
+autonomy rather than beside it: messaging cannot run unless `autonomy.md`
+also says `AUTONOMOUS`.
+
+The fetch happens outside the agent entirely, in a small adapter script
+per provider, so the tool allowlist an autonomous run gets never widens to
+include network access. And every channel is draft-only: an adapter that
+reads is unattended, but nothing it produces is ever sent without a human
+reviewing the pull request first. See `messaging.md` for the full
+contract and `../scripts/channels/README.md` for how an adapter is
+written.
 
 ## Why
 

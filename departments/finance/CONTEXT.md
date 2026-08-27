@@ -35,6 +35,7 @@ This table is a documented policy, not a technical restriction: see
 | Founder preferences | `../../_company/founder-preferences.md` | Full file | Standing preferences |
 | This department | `learnings.md` | Full file | Patterns from past runs |
 | User | (conversation) | Period's transactions/statements | The raw data for this run |
+| Messages | `../../.messages/[channel].jsonl` | New since last run | Delete unless a channel in `../../_company/messaging.md` routes here |
 
 ## Process
 

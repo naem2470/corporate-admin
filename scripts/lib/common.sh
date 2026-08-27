@@ -47,4 +47,11 @@ is_ci() {
 # backstop and the hook can never disagree about what looks like a secret.
 # Not a substitute for the full-history gitleaks scan in CI -- see
 # integrations/CREDENTIALS.md.
-SECRET_PATTERN='sk-ant-[A-Za-z0-9_-]{10,}|AKIA[0-9A-Z]{16}|-----BEGIN[A-Z ]*PRIVATE KEY-----'
+#
+# Covers, in order: Anthropic keys, AWS access key IDs, PEM private key
+# headers, Slack tokens (bot/user/app/refresh -- xoxb-/xoxp-/xoxa-/xoxr-),
+# GitHub tokens (classic and fine-grained), and Google OAuth refresh
+# tokens. The last two were added for scripts/channels/ adapters, which
+# read exactly this shape of credential; extend this pattern before adding
+# a new provider whose token has a different recognizable prefix.
+SECRET_PATTERN='sk-ant-[A-Za-z0-9_-]{10,}|AKIA[0-9A-Z]{16}|-----BEGIN[A-Z ]*PRIVATE KEY-----|xox[bapr]-[A-Za-z0-9-]{10,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|1//[A-Za-z0-9_-]{20,}'

@@ -30,6 +30,7 @@ This table is a documented policy, not a technical restriction: see
 | This department | `learnings.md` | Full file | Patterns from past runs |
 | Skill | `[skills/[name]/SKILL.md or ../../skills/[name]/SKILL.md]` | [section or Full file] | [what it provides, delete row if none installed] |
 | User | (conversation) | [what the human provides this run] | [why it's needed, delete row if this department takes no human input] |
+| Messages | `../../.messages/[channel].jsonl` | New since last run | [delete row unless a channel in `../../_company/messaging.md` routes here] |
 
 ## Process
 

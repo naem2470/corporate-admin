@@ -14,7 +14,7 @@ corporate-admin/
 ├── .github/workflows/      (CI: validate.yml gates PRs, daily-digest.yml posts the roundup,
 │                            autonomous-run.yml runs departments headless, ships inert)
 ├── setup/                  (onboarding questionnaire, employee-onboarding.md)
-├── _company/               (shared context: org chart, company info, founder prefs, extensions, budget)
+├── _company/               (shared context: org chart, company info, founder prefs, extensions, budget, autonomy, messaging)
 ├── skills/                 (company-wide skill library, see skills/INSTALLING.md)
 ├── integrations/           (company-wide MCP/API/SDK library, see integrations/INSTALLING.md)
 └── departments/
@@ -69,6 +69,7 @@ department COMPLETE (has files besides `.gitkeep`) or PENDING (does not).
 | Install, update, or remove an integration | `integrations/INSTALLING.md`, then `integrations/CREDENTIALS.md` |
 | Check or activate AI spend budgets | `_company/budget.md` (inactive by default) |
 | Check or activate autonomous, unattended department runs | `_company/autonomy.md` (manual by default) |
+| Check or activate inbound email/Slack/Teams reading | `_company/messaging.md` (inactive by default, draft-only) |
 
 ## What to Load
 

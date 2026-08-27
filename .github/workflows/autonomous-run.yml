@@ -44,6 +44,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Guarded independently by _company/messaging.md's own Status, so
+      # this is a no-op until that file is separately switched on -- see
+      # scripts/fetch-messages.sh. Provider secrets are added here only
+      # once a real channel exists; none do yet.
+      - name: Fetch inbound messages
+        run: bash scripts/fetch-messages.sh
+
       - name: Run each department
         id: run
         run: |

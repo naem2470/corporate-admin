@@ -26,6 +26,7 @@ grows.
 | Workspace conventions | `_company/EXTENSIONS.md` | Why department CONTEXT.md has Role/Trigger sections plus learnings.md, tiered skills, and script-enforced checks |
 | Budget and cost control | `_company/budget.md` | AI/agent spend policy; `Status: INACTIVE` by default |
 | Autonomous operation | `_company/autonomy.md` | Unattended department runs; `Status: MANUAL` by default, needs a second key outside git to arm |
+| Inbound messaging | `_company/messaging.md` | Email/Slack/Teams reading for autonomous runs; `Status: INACTIVE` by default, draft-only, never sends |
 | Skills library | `skills/CONTEXT.md` | Company-wide skills; pointer to `skills/INSTALLING.md` |
 | Integrations library | `integrations/CONTEXT.md` | Company-wide MCP/API/SDK integrations; pointer to `integrations/INSTALLING.md` and `integrations/CREDENTIALS.md` |
 | Scripts | `scripts/README.md` | Onboarding scripts and the `validate.sh` keystone shared by the pre-commit hook and CI |

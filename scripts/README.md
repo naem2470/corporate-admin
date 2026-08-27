@@ -8,10 +8,14 @@ git and coreutils, on purpose, so that stays true.
 | Script | Run it when | What it does |
 |--------|-------------|--------------|
 | `onboard.sh` | Right after cloning, or any time you want a health check | Checks prerequisites, sets up `.env.local`, installs git hooks, runs `validate.sh`, prints your seat and next steps. Idempotent. |
-| `validate.sh` | Anytime, and automatically via the pre-commit hook and CI | The keystone. Twelve checks against the conventions this workspace is built on. Same script, same rules, whether run by a person, a hook, or `.github/workflows/validate.yml`. |
+| `validate.sh` | Anytime, and automatically via the pre-commit hook and CI | The keystone. Thirteen checks against the conventions this workspace is built on. Same script, same rules, whether run by a person, a hook, or `.github/workflows/validate.yml`. |
 | `install-hooks.sh` | Called by `onboard.sh`; run directly to reinstall | Points `core.hooksPath` at `.githooks/` so `pre-commit` is version-controlled instead of sitting untracked in `.git/hooks/`. |
 | `new-department.sh <name>` | Adding a department | Copies `departments/_template/` to `departments/<name>/` and prints the three follow-up edits (Role/Trigger, org-chart row, routing row) the template can't make for you. |
 | `run-department.sh <name> [--dry-run]` | Called by `.github/workflows/autonomous-run.yml`; safe to run by hand anytime | Runs a department headless through the Anthropic API, gated behind `../_company/autonomy.md`'s two keys and that department's own opt-in row. Exits 0 and does nothing if either key is closed, which is the shipped state. `--dry-run` prints the command it would run and spends nothing. |
+| `fetch-messages.sh [--dry-run]` | Called by `.github/workflows/autonomous-run.yml`, before `run-department.sh`; safe to run by hand anytime | Fetches every active channel in `../_company/messaging.md`'s roster into `.messages/`, gated behind that file's Status and `autonomy.md`'s two keys. Exits 0 and does nothing if any gate is closed. See `channels/README.md` for adapters. |
+
+`channels/` holds one adapter script per messaging provider, each fetching
+into the shape `fetch-messages.sh` expects. See `channels/README.md`.
 
 ## `validate.sh` usage
 

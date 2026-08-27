@@ -48,6 +48,7 @@ while [ $# -gt 0 ]; do
       say "  naming           file/folder names are lowercase-with-hyphens"
       say "  secrets          no secret-shaped strings in committable files"
       say "  autonomy         _company/autonomy.md is well-formed and armed rows are safe"
+      say "  messaging        _company/messaging.md is well-formed and no adapter can send"
       exit 0
       ;;
     *)
@@ -335,6 +336,72 @@ check_autonomy() {
   return $status
 }
 
+# --- 13: _company/messaging.md is well-formed, and no adapter can send -----
+# Reading is unattended; sending is not implemented anywhere in this repo
+# (see messaging.md's "Draft Only, Always"). Two halves: the roster table
+# is internally consistent, and no file in scripts/channels/ contains a
+# send-shaped call. The second half is a smell test, like SECRET_PATTERN,
+# not a proof of absence -- comments are stripped first so the template's
+# own prose describing the rule ("no send, no post, no reply") can never
+# trip its own check.
+check_messaging() {
+  local status=0 f="_company/messaging.md" dir line st cells
+  local channel adapter bot scope routes mode
+  [ -f "$f" ] || return 0
+  dir="$(dirname "$f")"
+
+  st="$(grep -m1 '^\*\*Status:' "$f" | sed -E 's/^\*\*Status: *([A-Za-z]*)\*\*.*/\1/')"
+  case "$st" in
+    INACTIVE|ACTIVE) : ;;
+    *)
+      fail "$f: Status must be INACTIVE or ACTIVE, found '${st:-<none found>}'"
+      status=1
+      ;;
+  esac
+
+  while IFS= read -r line; do
+    IFS='|' read -r -a cells <<< "$line"
+    channel="$(printf '%s' "${cells[1]:-}" | tr -d ' `')"
+    [ -z "$channel" ] && continue
+    adapter="$(printf '%s' "${cells[3]:-}" | tr -d '[:space:]`')"
+    bot="$(printf '%s' "${cells[4]:-}" | tr -d '[:space:]')"
+    scope="$(printf '%s' "${cells[5]:-}" | tr -d '[:space:]')"
+    routes="$(printf '%s' "${cells[6]:-}" | tr -d ' `')"
+    mode="$(printf '%s' "${cells[7]:-}" | tr -d '[:space:]')"
+
+    if [ -n "$routes" ] && [ ! -e "$dir/$routes" ] && [ ! -e "$routes" ]; then
+      fail "$f: $channel's Routes To '$routes' does not resolve to a department"
+      status=1
+    fi
+
+    if [ "$mode" = "active" ]; then
+      if [ -z "$adapter" ] || [ ! -f "scripts/channels/$adapter" ]; then
+        fail "$f: $channel is active with no adapter at scripts/channels/$adapter"
+        status=1
+      fi
+      if [ -z "$bot" ]; then
+        fail "$f: $channel is active with no Bot Identity -- a shared or personal account is not allowed here"
+        status=1
+      fi
+      if [ -z "$scope" ]; then
+        fail "$f: $channel is active with no Read Scope"
+        status=1
+      fi
+    fi
+  done < <(awk '/^## Channel Roster/{t=1;next} /^## /{t=0} t && /^\|/' "$f" | grep -v -- '---' | tail -n +2)
+
+  local adapter_file stripped
+  while IFS= read -r adapter_file; do
+    stripped="$(sed 's/#.*//' "$adapter_file" | grep -v '^[[:space:]]*$')"
+    if printf '%s' "$stripped" | grep -EiIq 'send[_-]?message|postMessage|messages\.send|reply[_-]?to|sendmail|Send-MailMessage'; then
+      fail "$adapter_file: contains a send-shaped call -- adapters are read-only, see scripts/channels/README.md"
+      status=1
+    fi
+  done < <(find scripts/channels -type f -name '*.sh' 2>/dev/null)
+
+  return $status
+}
+
 run_check structure       "department folders have the required shape"
 run_check placeholders    "no unresolved {{PLACEHOLDER}} values outside templates"
 run_check cross_refs      "Inputs/Integrations table paths resolve"
@@ -347,6 +414,7 @@ run_check org_chart_paths "org-chart.md Department Folder paths resolve"
 run_check naming          "file and folder names are lowercase-with-hyphens"
 run_check secrets         "no secret-shaped strings in committable files"
 run_check autonomy        "_company/autonomy.md is well-formed and armed rows are safe"
+run_check messaging       "_company/messaging.md is well-formed and no adapter can send"
 
 if [ "$FAILURES" -gt 0 ]; then
   fail "$FAILURES check(s) failed"

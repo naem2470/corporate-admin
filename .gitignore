@@ -19,6 +19,12 @@ credentials.json
 # Node dependencies (if an SDK is ever added)
 node_modules/
 
+# Fetched inbound messages and per-channel watermarks (see
+# _company/messaging.md). Third-party content that may contain anything;
+# must never land in git. Only the derived draft and advanced watermark
+# reach a pull request, never this raw snapshot.
+.messages/
+
 # OS files
 .DS_Store
 Thumbs.db
