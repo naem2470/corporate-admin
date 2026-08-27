@@ -1,0 +1,103 @@
+name: Daily Digest
+
+# Starts on a weekly cadence -- with one seat on the org chart today, a
+# daily post is more noise than signal. Tighten `cron` to a daily schedule
+# once a second person is on the roster (see setup/employee-onboarding.md).
+# Monday 13:00 UTC. GitHub Actions cron does not observe DST, so the local
+# time this lands at will drift by an hour twice a year; harmless for a
+# digest.
+on:
+  schedule:
+    - cron: "0 13 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  digest:
+    name: Post digest
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so `git log --since` has something to search
+
+      - name: Build digest.md
+        run: |
+          LOOKBACK="7 days ago"
+          {
+            echo "# Daily Digest"
+            echo ""
+            echo "_Generated $(date -u +'%Y-%m-%d %H:%M UTC')_"
+            echo ""
+
+            echo "## Commits merged to main (last 7 days)"
+            echo ""
+            commits="$(git log --since="$LOOKBACK" --pretty='format:- %h %s (%an)' HEAD)"
+            if [ -z "$commits" ]; then echo "_None._"; else echo "$commits"; fi
+            echo ""
+
+            echo "## Open PRs awaiting review (oldest first)"
+            echo ""
+            prs="$(gh pr list --state open --json number,title,createdAt,author \
+              --jq 'sort_by(.createdAt) | .[] | "- #\(.number) \(.title) -- opened \(.createdAt) by \(.author.login)"' 2>/dev/null || true)"
+            if [ -z "$prs" ]; then echo "_None._"; else echo "$prs"; fi
+            echo ""
+
+            echo "## Recurring departments: overdue check"
+            echo ""
+            overdue_found=0
+            for d in $(find departments -mindepth 1 -maxdepth 1 -type d ! -name '_template' | sort); do
+              ctx="$d/CONTEXT.md"
+              [ -f "$ctx" ] || continue
+              trigger_line="$(awk '/^## Trigger/{f=1;next} /^## /{f=0} f' "$ctx" | tr -d '\r' | grep -v '^[[:space:]]*$' | head -1)"
+              case "$trigger_line" in
+                *[Rr]ecurring*) : ;;
+                *) continue ;;
+              esac
+              period=""
+              case "$trigger_line" in
+                *[Mm]onthly*)   period="$(date -u +%Y-%m)" ;;
+                *[Ww]eekly*)    period="$(date -u +%G-W%V)" ;;
+                *[Dd]aily*)     period="$(date -u +%Y-%m-%d)" ;;
+                *[Qq]uarterly*) q=$(( ($(date -u +%-m) - 1) / 3 + 1 )); period="$(date -u +%Y)-Q${q}" ;;
+              esac
+              if [ -z "$period" ]; then
+                echo "- **$d**: Trigger says recurring but the cadence keyword wasn't recognized -- review manually (\`$trigger_line\`)"
+                overdue_found=1
+                continue
+              fi
+              if ! ls "$d/output" 2>/dev/null | grep -q "$period"; then
+                echo "- **$d**: no output artifact for $period yet (Trigger: \`$trigger_line\`)"
+                overdue_found=1
+              fi
+            done
+            [ "$overdue_found" -eq 0 ] && echo "_All recurring departments are current._"
+            echo ""
+
+            echo "## scripts/validate.sh on main"
+            echo ""
+            if bash scripts/validate.sh > /tmp/validate-output.txt 2>&1; then
+              echo "_Clean -- all checks pass._"
+            else
+              echo '```'
+              cat /tmp/validate-output.txt
+              echo '```'
+            fi
+          } > digest.md
+
+      - name: Create or update the pinned digest issue
+        run: |
+          # One issue, edited in place each run, so the repo doesn't fill
+          # with a new issue every week.
+          num="$(gh issue list --search 'in:title "Daily Digest" is:open' --json number --jq '.[0].number // empty')"
+          if [ -z "$num" ]; then
+            gh issue create --title "Daily Digest" --body-file digest.md
+          else
+            gh issue edit "$num" --body-file digest.md
+          fi

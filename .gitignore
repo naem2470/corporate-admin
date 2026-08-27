@@ -1,0 +1,35 @@
+# Environment files (real credential values never committed)
+.env
+.env.local
+.env.*.local
+*.env
+
+# Credential-shaped files
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+*-credentials.*
+*.secret
+
+# Claude Code local settings (local-only; project settings.json can still be committed)
+.claude/settings.local.json
+
+# Node dependencies (if an SDK is ever added)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/settings.json
+
+# Note: output/ folders are NOT ignored here. Unlike a content pipeline's
+# throwaway build artifacts, this workspace's output/ folders are the
+# company's actual financial records and belong in version history.

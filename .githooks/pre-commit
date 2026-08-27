@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Runs on `git commit`, against staged content only, so it stays fast.
+# Installed by scripts/install-hooks.sh (sets core.hooksPath to .githooks/,
+# which is version-controlled -- this hook travels with the repo instead of
+# living in an untracked .git/hooks/).
+#
+# Two checks:
+#   1. Secret smell test on the staged diff. Automates the manual step
+#      integrations/CREDENTIALS.md already asks for by hand: "run git
+#      status and read the list" before any commit touching integrations.
+#   2. scripts/validate.sh --quiet against the working tree.
+#
+# Bypass for a genuine emergency: git commit --no-verify
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+# shellcheck source=../scripts/lib/common.sh
+source "$ROOT/scripts/lib/common.sh"
+cd "$ROOT" || exit 1
+
+STAGED="$(git diff --cached --name-only --diff-filter=ACM)"
+
+if [ -n "$STAGED" ]; then
+  while IFS= read -r f; do
+    [ -f "$f" ] || continue
+    if git diff --cached -- "$f" | grep -InE "$SECRET_PATTERN" >/dev/null 2>&1; then
+      fail "$f: staged change matches a secret-shaped pattern"
+      say ""
+      say "Do not commit this. See integrations/CREDENTIALS.md -- real"
+      say "credential values never enter this repo, even briefly."
+      say "If this is a false positive, commit with --no-verify."
+      exit 1
+    fi
+  done <<< "$STAGED"
+fi
+
+if ! scripts/validate.sh --quiet; then
+  say ""
+  fail "validate.sh found problems (see above). Fix them, or commit with --no-verify to bypass."
+  exit 1
+fi
+
+exit 0

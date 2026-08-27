@@ -1,0 +1,51 @@
+name: Validate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  secret-scan:
+    name: Secret scan (gitleaks, full history)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history -- a secret from an earlier commit
+                          # on this branch still matters, not just the tip
+
+      - name: Install gitleaks
+        run: |
+          # Resolved dynamically against the latest release rather than
+          # pinned, so this step doesn't go stale. Uses the binary
+          # directly (MIT, no license key) rather than
+          # gitleaks/gitleaks-action, which requires GITLEAKS_LICENSE for
+          # organization-owned repos -- this keeps working unchanged if
+          # this repo is ever transferred to an org. If gitleaks renames
+          # its release asset naming, this step will fail loudly with a
+          # 404 rather than silently skipping the scan.
+          version="$(curl -sL https://api.github.com/repos/gitleaks/gitleaks/releases/latest | jq -r '.tag_name' | sed 's/^v//')"
+          curl -sL "https://github.com/gitleaks/gitleaks/releases/download/v${version}/gitleaks_${version}_linux_x64.tar.gz" -o gitleaks.tar.gz
+          tar -xzf gitleaks.tar.gz gitleaks
+          chmod +x gitleaks
+          sudo mv gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
+      - name: Run gitleaks
+        run: gitleaks detect --source . --no-banner --redact
+
+  conventions:
+    name: Convention lint (scripts/validate.sh)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Every rule lives in the script, not here. A rule added locally is
+      # enforced in CI automatically, with no workflow edit needed.
+      - name: Run validate.sh
+        run: bash scripts/validate.sh
