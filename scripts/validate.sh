@@ -49,6 +49,7 @@ while [ $# -gt 0 ]; do
       say "  secrets          no secret-shaped strings in committable files"
       say "  autonomy         _company/autonomy.md is well-formed and armed rows are safe"
       say "  messaging        _company/messaging.md is well-formed and no adapter can send"
+      say "  codeowners       every department has an owner line in .github/CODEOWNERS"
       exit 0
       ;;
     *)
@@ -402,6 +403,29 @@ check_messaging() {
   return $status
 }
 
+# --- 14: every department has a CODEOWNERS line -----------------------------
+# .github/CODEOWNERS is the enforced counterpart to org-chart.md's Filled By:
+# once main's protection rule requires code owner review, a PR touching a
+# department folder cannot merge without that line's owner approving. A
+# department with no line falls through to the `*` fallback (founder-only),
+# which is almost always an oversight from scripts/new-department.sh.
+# Usernames are not checked here -- GitHub flags invalid owners in its own
+# view of the file.
+check_codeowners() {
+  local status=0 f=".github/CODEOWNERS" d
+  if [ ! -f "$f" ]; then
+    fail "$f: missing -- see setup/employee-onboarding.md"
+    return 1
+  fi
+  for d in $(departments); do
+    grep -qE "^/$d/[[:space:]]+@" "$f" || {
+      fail "$f: no owner line for $d/ (add '/$d/  @owner @founder')"
+      status=1
+    }
+  done
+  return $status
+}
+
 run_check structure       "department folders have the required shape"
 run_check placeholders    "no unresolved {{PLACEHOLDER}} values outside templates"
 run_check cross_refs      "Inputs/Integrations table paths resolve"
@@ -415,6 +439,7 @@ run_check naming          "file and folder names are lowercase-with-hyphens"
 run_check secrets         "no secret-shaped strings in committable files"
 run_check autonomy        "_company/autonomy.md is well-formed and armed rows are safe"
 run_check messaging       "_company/messaging.md is well-formed and no adapter can send"
+run_check codeowners      "every department has an owner line in .github/CODEOWNERS"
 
 if [ "$FAILURES" -gt 0 ]; then
   fail "$FAILURES check(s) failed"

@@ -1,0 +1,24 @@
+# Code owners: who must approve a pull request before it can merge into main.
+#
+# GitHub only enforces this once main's protection rule has "Require review
+# from Code Owners" turned on. Without it, owners are only auto-requested.
+#
+# Rules:
+#   - The LAST matching line wins. Broad patterns first, specific ones below.
+#   - Several owners on one line = any ONE of them can approve.
+#   - A PR author cannot approve their own PR, so each department keeps the
+#     founder as a second owner.
+#   - Every owner needs write access to this repo.
+#
+# Keep in sync with _company/org-chart.md. scripts/validate.sh fails if a
+# department folder has no line here. See setup/employee-onboarding.md.
+
+# Fallback: everything not matched below is founder-only. That covers
+# _company/, scripts/, skills/, integrations/, setup/, root files,
+# departments/_template/, and .github/ (including this file).
+*                          @naem2470
+
+# Departments: one line per folder. When someone fills the role, put their
+# GitHub username before the founder, e.g.
+#   /departments/finance/  @finance-seat-username @naem2470
+/departments/finance/      @naem2470

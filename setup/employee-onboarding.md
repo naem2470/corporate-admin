@@ -20,6 +20,11 @@ send them to `scripts/onboard.sh` instead -- step 4 below.
    If the role needs its own department workflow that doesn't exist yet,
    run `scripts/new-department.sh [dept-name]` first.
 
+   Then put their GitHub username on their department's line in
+   `.github/CODEOWNERS`, before the founder, so pull requests touching that
+   folder need their approval. `scripts/validate.sh` fails if a department
+   has no line there.
+
 3. **Credentials, least privilege.** Before they touch anything with an
    integration, read `integrations/CREDENTIALS.md`. The two rules that
    matter most here: give them their **own** credential, not a shared one
@@ -56,7 +61,8 @@ Do this in order -- credential rotation first, bookkeeping second, per
    just in a notes file. Since step 3 above gave them a per-seat
    credential, this does not affect anyone else.
 2. Remove their row from `_company/org-chart.md`'s roster table and from
-   the Role Skill & Integration Assignments table.
+   the Role Skill & Integration Assignments table, and their username from
+   `.github/CODEOWNERS`.
 3. Remove their GitHub repo access.
 4. If anything they owned has no other seat covering it (a department with
    `Filled By` naming only them), decide who picks it up before they leave,
