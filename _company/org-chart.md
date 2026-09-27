@@ -13,6 +13,8 @@ a new department is added.
 2. If the role needs its own department workflow, copy
    `../departments/_template/` to `../departments/[new-department]/` and
    fill it in.
+3. Add the department's owner line to `../.github/CODEOWNERS`. That file is
+   the enforced counterpart to the Filled By column above.
 
 ## Role Skill & Integration Assignments
 

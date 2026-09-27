@@ -11,8 +11,9 @@ corporate-admin/
 ├── CLAUDE.md               (you are here)
 ├── CONTEXT.md              (start here for task routing)
 ├── scripts/                (onboarding + the validate.sh keystone; see scripts/README.md)
-├── .github/workflows/      (CI: validate.yml gates PRs, daily-digest.yml posts the roundup,
-│                            autonomous-run.yml runs departments headless, ships inert)
+├── .github/                (CODEOWNERS routes PR approval by folder; workflows/: validate.yml
+│                            gates PRs, daily-digest.yml posts the roundup, autonomous-run.yml
+│                            runs departments headless, ships inert)
 ├── setup/                  (onboarding questionnaire, employee-onboarding.md)
 ├── _company/               (shared context: org chart, company info, founder prefs, extensions, budget, autonomy, messaging)
 ├── skills/                 (company-wide skill library, see skills/INSTALLING.md)

@@ -21,6 +21,12 @@ This turns a department folder into an org-chart seat, not just a stage:
 you can see who owns it and when it runs without opening the process
 itself.
 
+Filled By is documentation. The enforced counterpart is
+`../.github/CODEOWNERS`: once `main`'s protection rule requires code owner
+review, a pull request touching a department folder cannot merge without
+that folder's owner approving. `../scripts/validate.sh` fails if a
+department has no line there.
+
 ## 2. Curated `learnings.md`
 
 Every department keeps a `learnings.md` next to its `CONTEXT.md`. An agent
